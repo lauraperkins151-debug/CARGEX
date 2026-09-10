@@ -1,33 +1,44 @@
-# CargeX — Professional Delivery Tracking Website
+# CargeX — Production Deployment Package
 
-Full-stack Express + SQLite delivery tracking website with a polished blue-and-white logistics design and working admin portal.
+Full-stack Express + SQLite CargeX delivery tracking website with a blue-and-white logistics design, customer tracking, and an admin portal.
 
-## Features
-- CargeX branded responsive homepage
-- Professional hero section and shipment tracker
-- Unique tracking numbers such as `CARGEX-2026-000001`
-- Customer tracking page with shipment timeline
-- SQLite database for shipments and tracking events
-- Admin login and dashboard
-- Create shipments and automatically generate tracking numbers
-- Publish status/location updates visible to customers
-- Mobile responsive layout
+## Production changes
+- SQLite database path can be configured with `CARGEX_DATA_DIR`; Railway automatically uses `RAILWAY_VOLUME_MOUNT_PATH` when present.
+- Secure HTTPS-only session cookies when `NODE_ENV=production`.
+- Production startup refuses to run without a strong `SESSION_SECRET` (32+ characters).
+- `/health` endpoint for deployment health checks.
+- Admin password-change page at `/admin/account` with a 12-character minimum.
+- Tracking numbers include a short uniqueness suffix to reduce collisions.
 
-## Run locally
-1. Install Node.js 18+.
-2. Open this folder in a terminal.
-3. Run `npm install`.
+## Local run
+1. Install Node.js 18+ (20+ recommended).
+2. Run `npm install`.
+3. Set `SESSION_SECRET` to a random 32+ character value (production requires it).
 4. Run `npm start`.
 5. Open `http://localhost:3000`.
 
-## Admin
-Open `http://localhost:3000/admin/login`
+## Production / Railway
+1. Push the contents of this folder to a private GitHub repository.
+2. Create a Railway project and deploy the GitHub repository as a Node service.
+3. Set these Railway service variables:
+   - `NODE_ENV=production`
+   - `SESSION_SECRET=<strong random 32+ character secret>`
+4. Attach a Railway Volume to the CargeX service and set its mount path to `/app/data`.
+5. Set `CARGEX_DATA_DIR=/app/data` as a service variable. (Alternatively, the app will use Railway's `RAILWAY_VOLUME_MOUNT_PATH` automatically.)
+6. Deploy and generate a public domain from Railway Networking.
+7. Test `https://YOUR-DOMAIN/health`, `https://YOUR-DOMAIN/track`, and `https://YOUR-DOMAIN/admin/login`.
 
-Initial credentials:
+Railway Volumes persist application data across deployments and restarts. Mount the volume at `/app/data` because Railway places the application under `/app`.
+
+## Admin
+Initial account (change immediately):
 - Email: `admin@cargex.com`
 - Password: `ChangeMe123!`
 
-**Before production:** change the default admin password, set a strong `SESSION_SECRET`, enable HTTPS, set secure cookies, and use a production database/host as appropriate.
+After the first login, open `/admin/account` and set a strong password of at least 12 characters.
 
-## Notes
-The website uses CargeX's own branding and design rather than copying DHL/FedEx trademarks or logos. Replace the placeholder contact email (`support@cargex.com`) with your real business address before launch.
+## Important
+- Do not commit `.env` files, production secrets, or the SQLite database to GitHub.
+- Use a private GitHub repository.
+- Replace `support@cargex.com` with your real support address before launch.
+- Only publish tracking records for genuine shipments and accurate status updates.
